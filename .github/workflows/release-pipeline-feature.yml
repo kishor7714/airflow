@@ -1,16 +1,17 @@
-name: release pipeline test
+name: Feature Pipeline CI
  
 on:
   push:
-    branches: [ "test" ]
+    branches: [ "features/*" ]
   # pull_request:
-  #   branches: [ "test" ]
+  #   branches: [ "features/*" ]
 
 jobs:
 
-  job1: 
+  job-features/*: 
 
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/features/*'
     env:
         JAVA_VERSION: '11'
         DOCKER_REPO: 'configr'
@@ -39,7 +40,7 @@ jobs:
       run: docker images
     - name: docker login
       run: aws ecr get-login-password --region ${REGION} | docker login --username AWS --password-stdin ${AWS_REPO}
-    - name: docker tag image from configr:test to aws ecr
+    - name: docker tag image from configr:features/* to aws ecr
       run: docker tag configr:$GITHUB_REF_NAME 716884131628.dkr.ecr.ap-south-1.amazonaws.com/${APP_NAME}:$GITHUB_REF_NAME      
     - name: docker push
-      run: docker push ${AWS_REPO}/${APP_NAME}:$GITHUB_REF_NAME 
+      run: docker push ${AWS_REPO}/${APP_NAME}:$GITHUB_REF_NAMEname: release pipeline prod

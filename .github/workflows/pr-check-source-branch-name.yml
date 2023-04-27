@@ -9,9 +9,9 @@ on:
     branches:
 #For example, you can restrict actions on pull requests to only run when created against the test branch:
       - test
-      - demo
-      - prod
-#       - features/*
+      - main
+      # - prod
+      - features/*
 #Ref: https://github.com/orgs/community/discussions/27154      
 jobs:
   Get_SRC_DEST_BRANCH_NAMES_VERIFY_BRANCH_RULES:
@@ -28,9 +28,9 @@ jobs:
         - name: get PR source Branch name from github.event.pull_request.base.ref
           run: |
                 if [[ $PR_TARGET_BRANCH == "test" ]]; then
-                  if [[ ! $PR_SOURCE_BRANCH == dev ]]; then
-                    echo "Error: If PR target branch is 'test', the PR source branch must start with 'dev'"
+                  if [[ ! $PR_SOURCE_BRANCH == main ]]; then
+                    echo "Error: If PR target branch is 'test', the PR source branch must start with 'main'"
                     exit 1
                   fi                    
                 fi
-                echo "Branch validation successful."
+                echo "Branch validation successful."

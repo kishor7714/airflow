@@ -12,11 +12,11 @@ on:
 #       - features/dhrj
 #       - features/dhrj2
 #       - features/GA*
-#       - features/DI*
-      - dev
+      - features/*
+      - main
       - test
-      - demo
-      - prod
+      # - demo
+      # - prod
 jobs:
 
   PR-Check-Docker-build:
