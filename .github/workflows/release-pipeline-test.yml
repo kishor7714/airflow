@@ -1,17 +1,17 @@
-name: main branch push
+name: release ppeline test
  
 on:
   push:
-    branches: [ "test" ]
+    branches: [ "main" ]
   # pull_request:
-  #   branches: [ "test" ]
+  #   branches: [ "main" ]
 
 jobs:
 
   job1: 
 
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/test'
+    if: github.ref == 'refs/heads/main'
     env:
         JAVA_VERSION: '11'
         DOCKER_REPO: 'configr'
