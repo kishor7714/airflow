@@ -11,7 +11,6 @@ jobs:
   job-features: 
 
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/features/*'
     env:
         JAVA_VERSION: '11'
         DOCKER_REPO: 'airflow'
