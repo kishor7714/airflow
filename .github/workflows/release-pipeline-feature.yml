@@ -61,6 +61,7 @@ jobs:
       run: docker images
     - name: docker login
       run: aws ecr get-login-password --region ${REGION} | docker login --username AWS --password-stdin ${AWS_REPO}
+    - name: trail
       shell: bash
       env:
         PROJECT_NAME: ${{ github.event.repository.name }}
