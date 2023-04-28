@@ -1,4 +1,4 @@
-name: release ppeline test
+name: release pipeline test
  
 on:
   push:
