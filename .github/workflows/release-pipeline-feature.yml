@@ -51,7 +51,9 @@ jobs:
         echo "Sha: ${{ steps.vars.outputs.sha_short }}"
         echo $BRANCH_NAME
         BRANCH_NAME=${1#"features/"}
+        echo "BRANCH_NAME: ${BRANCH_NAME}"
         BRANCH_NAME=$(echo $BRANCH_NAME| awk '{print tolower($0)}')
+        echo "BRANCH_NAME in lower case: ${BRANCH_NAME}"
         BRANCH_NAME_underscore=$(echo $BRANCH_NAME| tr '-' '_')
         echo $BRANCH_NAME_underscore
         docker build . --file Dockerfile --tag ${APP_NAME}:features-$BRANCH_NAME_underscore-${{ steps.vars.outputs.sha_short }}
