@@ -47,8 +47,14 @@ jobs:
         COMMIT_HASH: ${{ github.sha }}
       run: |
         echo "Branch: ${{ steps.vars.outputs.branch }}"
+        echo "BRANCH_NAME: ${BRANCH_NAME}"
         echo "Sha: ${{ steps.vars.outputs.sha_short }}"
-        docker build . --file Dockerfile --tag ${APP_NAME}:${{ steps.vars.outputs.sha_short }}
+        echo $BRANCH_NAME
+        BRANCH_NAME=${1#"features/"}
+        BRANCH_NAME=$(echo $BRANCH_NAME| awk '{print tolower($0)}')
+        BRANCH_NAME_underscore=$(echo $BRANCH_NAME| tr '-' '_')
+        echo $BRANCH_NAME_underscore
+        docker build . --file Dockerfile --tag ${APP_NAME}:features-$BRANCH_NAME_underscore-${{ steps.vars.outputs.sha_short }}
     - name: LISTING DOCKER IMAGES
       run: docker images
     - name: docker login
