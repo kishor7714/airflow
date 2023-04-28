@@ -23,7 +23,7 @@ jobs:
         REGION: 'ap-south-1'
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v2
     - name: Printing the branch name
       run: echo $GITHUB_REF_NAME
     - name: predefined envoirnment
