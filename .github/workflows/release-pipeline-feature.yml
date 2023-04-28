@@ -43,4 +43,4 @@ jobs:
     - name: docker tag image from airflow:features/* to aws ecr
       run: docker tag airflow:$GITHUB_REF_NAME 716884131628.dkr.ecr.ap-south-1.amazonaws.com/${APP_NAME}:$GITHUB_REF_NAME      
     - name: docker push
-      run: docker push ${AWS_REPO}/${APP_NAME}:$GITHUB_REF_NAMEname: release pipeline prod
+      run: docker push ${AWS_REPO}/${APP_NAME}:$GITHUB_REF_NAME
