@@ -13,6 +13,28 @@ on:
       # - prod
       - features/*
 #Ref: https://github.com/orgs/community/discussions/27154      
+# jobs:
+#   Get_SRC_DEST_BRANCH_NAMES_VERIFY_BRANCH_RULES:
+#     name: check if the source and dest branch is correct and allowed branches 
+#     runs-on: ubuntu-latest
+#     env:
+#       PR_SOURCE_BRANCH: ${{ github.event.pull_request.head.ref }}
+#       PR_TARGET_BRANCH: ${{ github.event.pull_request.base.ref }}      
+#     steps:
+#         - name: get PR source Branch name FROM github.event.pull_request.base.ref
+#           run: echo "PR initiated FROM Branch name" $PR_SOURCE_BRANCH
+#         - name: get PR source Branch name TO github.event.pull_request.head.ref
+#           run: echo "PR initiated TO Branch name" $PR_TARGET_BRANCH
+#         - name: get PR source Branch name from github.event.pull_request.base.ref
+#           run: |
+#                 if [[ $PR_TARGET_BRANCH == "test" ]]; then
+#                   if [[ ! $PR_SOURCE_BRANCH == main ]]; then
+#                     echo "Error: If PR target branch is 'test', the PR source branch must start with 'main'"
+#                     exit 1
+#                   fi                    
+#                 fi
+#                 echo "Branch validation successful."
+
 jobs:
   Get_SRC_DEST_BRANCH_NAMES_VERIFY_BRANCH_RULES:
     name: check if the source and dest branch is correct and allowed branches 
@@ -27,10 +49,17 @@ jobs:
           run: echo "PR initiated TO Branch name" $PR_TARGET_BRANCH
         - name: get PR source Branch name from github.event.pull_request.base.ref
           run: |
-                if [[ $PR_TARGET_BRANCH == "test" ]]; then
-                  if [[ ! $PR_SOURCE_BRANCH == main ]]; then
-                    echo "Error: If PR target branch is 'test', the PR source branch must start with 'main'"
+                if [[ $PR_TARGET_BRANCH == "main" ]]; then
+                  if [[ ! $PR_SOURCE_BRANCH == features/* ]]; then
+                    echo "Error: If PR target branch is 'main', the PR source branch must start with 'features/'"
+                    exit 1
+                  fi
+                  if [[ ! $PR_SOURCE_BRANCH == features/ga* ]] && [[ ! $PR_SOURCE_BRANCH == features/di* ]] && [[ ! $PR_SOURCE_BRANCH == features/GA* ]] && [[ ! $PR_SOURCE_BRANCH == features/DI* ]]; then
+                    echo "Error: If PR_SOURCE_BRANCH starts with 'features/', it must be either 'features/GA' or 'features/DI'"
                     exit 1
                   fi                    
+                else
+                  echo "PR target branch is  $PR_TARGET_BRANCH Any Source branch is OKAY"
+                  exit 0
                 fi
-                echo "Branch validation successful."
+                echo "Branch validation successful."                
