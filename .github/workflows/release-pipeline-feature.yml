@@ -79,6 +79,7 @@ jobs:
         BRANCH_NAME_underscore=$(echo $BRANCH_NAME| tr '-' '_')
         echo $BRANCH_NAME_underscore
         docker tag ${APP_NAME}:features-$BRANCH_NAME_underscore-${{ steps.vars.outputs.sha_short }} 716884131628.dkr.ecr.ap-south-1.amazonaws.com/${APP_NAME}:features-$BRANCH_NAME_underscore-${{ steps.vars.outputs.sha_short }}      
+        docker tag ${APP_NAME}:features-$BRANCH_NAME_underscore-${{ steps.vars.outputs.sha_short }} 716884131628.dkr.ecr.ap-south-1.amazonaws.com/${APP_NAME}:features-latest
     - name: docker push
       shell: bash
       env:
@@ -97,3 +98,4 @@ jobs:
         BRANCH_NAME_underscore=$(echo $BRANCH_NAME| tr '-' '_')
         echo $BRANCH_NAME_underscore
         docker push ${AWS_REPO}/${APP_NAME}:features-$BRANCH_NAME_underscore-${{ steps.vars.outputs.sha_short }}
+        docker push ${AWS_REPO}/${APP_NAME}:features-latest
