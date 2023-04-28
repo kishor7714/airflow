@@ -23,8 +23,14 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+    - name: Declare some variables
+      id: vars
+      shell: bash
+      run: |
+        echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
     - name: Printing the branch name
-      run: echo $GITHUB_REF_NAME
+      run: echo $Sha
     - name: predefined envoirnment
       run: env
     - name: Configure AWS Credentials
@@ -34,12 +40,15 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_ACCESS_SECRET }}
           aws-region: ap-south-1           
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag ${APP_NAME}:$GITHUB_REF_NAME
+      run: |
+        echo "Branch: ${{ steps.vars.outputs.branch }}"
+        echo "Sha: ${{ steps.vars.outputs.sha_short }}"
+        docker build . --file Dockerfile --tag ${APP_NAME}:$Sha
     - name: LISTING DOCKER IMAGES
       run: docker images
     - name: docker login
       run: aws ecr get-login-password --region ${REGION} | docker login --username AWS --password-stdin ${AWS_REPO}
     - name: docker tag image from airflow:features/* to aws ecr
-      run: docker tag airflow:$GITHUB_REF_NAME 716884131628.dkr.ecr.ap-south-1.amazonaws.com/${APP_NAME}:$GITHUB_REF_NAME      
+      run: docker tag airflow:$Sha 716884131628.dkr.ecr.ap-south-1.amazonaws.com/${APP_NAME}:$Sha      
     - name: docker push
-      run: docker push ${AWS_REPO}/${APP_NAME}:$GITHUB_REF_NAME
+      run: docker push ${AWS_REPO}/${APP_NAME}:$Sha
