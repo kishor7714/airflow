@@ -37,7 +37,7 @@ jobs:
         PROJECT_NAME: ${{ github.event.repository.name }}
         BRANCH_NAME: ${{ steps.vars.outputs.branch }}
         COMMIT_HASH: ${{ github.sha }}
-        APP_NAME: 'configr'
+        APP_NAME: 'airflow'
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_ACCESS_SECRET }}
       run: |
