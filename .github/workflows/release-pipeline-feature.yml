@@ -39,7 +39,12 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.AWS_ACCESS_SECRET }}
           aws-region: ap-south-1           
-    - name: Build the Docker image
+    - name: Build the docker image
+      shell: bash
+      env:
+        PROJECT_NAME: ${{ github.event.repository.name }}
+        BRANCH_NAME: ${{ steps.vars.outputs.branch }}
+        COMMIT_HASH: ${{ github.sha }}
       run: |
         echo "Branch: ${{ steps.vars.outputs.branch }}"
         echo "Sha: ${{ steps.vars.outputs.sha_short }}"
