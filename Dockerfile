@@ -4,4 +4,4 @@ LABEL maintainer="Chris <c@crccheck.com>"
 
 RUN apt update
 RUN apt install -y vim git
-RUN apt install default-jdk
+RUN apt install -y default-jdk
