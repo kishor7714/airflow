@@ -67,7 +67,7 @@ jobs:
       with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.AWS_ACCESS_SECRET }}
-          aws-region: ap-south-1
+          aws-region: ap-south-1                 
     - name: Set major release
         #if: ${{ github.event.label.name == 'release-major' }}
         run: |
@@ -88,7 +88,13 @@ jobs:
           echo "OWNER=withmehealth" >> $GITHUB_ENV
           echo "REPO=${GITHUB_REPOSITORY#*/}" >> $GITHUB_ENV
     - name: Check if release tag already exist - if exist add patch by +1
-            curl \
+        run: |
+          echo "OWNER" $OWNER
+          echo "REPO" $REPO
+          echo "GITHUB_TOKEN" ${GITHUB_TOKEN}
+          echo "$(pwd)"
+          cat $GITHUB_ENV
+          curl \
               -H "Accept: application/vnd.github+json" \
               -H "Authorization: Bearer Y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" \
               https://api.github.com/repos/$DOCKER_ACCOUNT/$APP_NAME/tags | sed 's/[][]//g' | grep name | sed 's/^.............//' | sed 's/..$//' > version-list.txt
@@ -98,13 +104,6 @@ jobs:
               echo "Github Env variables after script execution that sets the version"
               cat $GITHUB_ENV
               echo "all done exiting"
-
-        run: |
-          echo "OWNER" $OWNER
-          echo "REPO" $REPO
-          echo "GITHUB_TOKEN" ${GITHUB_TOKEN}
-          echo "$(pwd)"
-          cat $GITHUB_ENV
     - name: "Build Changelog"
         id: build_changelog
         uses: mikepenz/release-changelog-builder-action@v3.4.0
