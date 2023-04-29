@@ -85,10 +85,10 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
+        tag_name: Rel_${{ env.REL_VER }}
+        release_name: Rel_${{ env.REL_VER }}
         body: |
-            Release ${{ github.ref }}
+            Rel_${{ env.REL_VER }}
 
             Changes:
             - Some change
