@@ -88,6 +88,17 @@ jobs:
           echo "OWNER=withmehealth" >> $GITHUB_ENV
           echo "REPO=${GITHUB_REPOSITORY#*/}" >> $GITHUB_ENV
     - name: Check if release tag already exist - if exist add patch by +1
+            curl \
+              -H "Accept: application/vnd.github+json" \
+              -H "Authorization: Bearer Y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" \
+              https://api.github.com/repos/$DOCKER_ACCOUNT/$APP_NAME/tags | sed 's/[][]//g' | grep name | sed 's/^.............//' | sed 's/..$//' > version-list.txt
+              echo "version list as below"
+              cat version-list.txt
+              bash release-pipeline-script.sh
+              echo "Github Env variables after script execution that sets the version"
+              cat $GITHUB_ENV
+              echo "all done exiting"
+
         run: |
           echo "OWNER" $OWNER
           echo "REPO" $REPO
