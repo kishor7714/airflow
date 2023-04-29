@@ -8,7 +8,7 @@ on:
 
 jobs:
 
-  job1: 
+  job-test: 
 
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
@@ -39,36 +39,7 @@ jobs:
       with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.AWS_ACCESS_SECRET }}
-          aws-region: ap-south-1           
-
-    - name: Build the docker image
-      shell: bash
-      env:
-        PROJECT_NAME: ${{ github.event.repository.name }}
-        BRANCH_NAME: ${{ steps.vars.outputs.branch }}
-        COMMIT_HASH: ${{ github.sha }}
-      run: |
-        echo "Branch: ${{ steps.vars.outputs.branch }}"
-        echo "BRANCH_NAME: ${BRANCH_NAME}"
-        echo "Sha: ${{ steps.vars.outputs.sha_short }}"
-        echo $BRANCH_NAME
-        BRANCH_NAME=${BRANCH_NAME#"features/"}
-        echo "BRANCH_NAME: ${BRANCH_NAME}"
-        BRANCH_NAME=$(echo $BRANCH_NAME| awk '{print tolower($0)}')
-        echo "BRANCH_NAME in lower case: ${BRANCH_NAME}"
-        BRANCH_NAME_underscore=$(echo $BRANCH_NAME| tr '-' '_')
-        echo $BRANCH_NAME_underscore
-        docker build . --file Dockerfile --tag ${APP_NAME}:features-$BRANCH_NAME_underscore-${{ steps.vars.outputs.sha_short }}
-    - name: Printing the branch name
-      run: echo $GITHUB_REF_NAME
-    - name: predefined envoirnment
-      run: env
-    # - name: Configure AWS Credentials
-    #   uses: aws-actions/configure-aws-credentials@v1
-    #   with:
-    #       aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
-    #       aws-secret-access-key: ${{ secrets.AWS_ACCESS_SECRET }}
-    #       aws-region: ap-south-1
+          aws-region: ap-south-1
     - name: Set major release
         #if: ${{ github.event.label.name == 'release-major' }}
         run: |
@@ -98,13 +69,36 @@ jobs:
           curl \
               -H "Accept: application/vnd.github+json" \
               -H "Authorization: Bearer Y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" \
-              https://api.github.com/repos/$DOCKER_ACCOUNT/$APP_NAME/tags | sed 's/[][]//g' | grep name | sed 's/^.............//' | sed 's/..$//' > version-list.txt
-              echo "version list as below"
-              cat version-list.txt
-              bash release-pipeline-script.sh
-              echo "Github Env variables after script execution that sets the version"
-              cat $GITHUB_ENV
-              echo "all done exiting"
+              https://api.github.com/repos/$OWNER/$REPO/tags | sed 's/[][]//g' | grep name | sed 's/^.............//' | sed 's/..$//' > version-list.txt
+          echo "version list as below"
+          cat version-list.txt
+          bash release-pipeline-script.sh
+          echo "Github Env variables after script execution that sets the version"
+          cat $GITHUB_ENV
+          echo "all done exiting"                   
+
+    - name: Build the docker image
+      shell: bash
+      env:
+        PROJECT_NAME: ${{ github.event.repository.name }}
+        BRANCH_NAME: ${{ steps.vars.outputs.branch }}
+        COMMIT_HASH: ${{ github.sha }}
+      run: |
+        echo "Branch: ${{ steps.vars.outputs.branch }}"
+        echo "BRANCH_NAME: ${BRANCH_NAME}"
+        echo "Sha: ${{ steps.vars.outputs.sha_short }}"
+        echo $BRANCH_NAME
+        BRANCH_NAME=${BRANCH_NAME#"features/"}
+        echo "BRANCH_NAME: ${BRANCH_NAME}"
+        BRANCH_NAME=$(echo $BRANCH_NAME| awk '{print tolower($0)}')
+        echo "BRANCH_NAME in lower case: ${BRANCH_NAME}"
+        BRANCH_NAME_underscore=$(echo $BRANCH_NAME| tr '-' '_')
+        echo $BRANCH_NAME_underscore
+        docker build . --file Dockerfile --tag ${APP_NAME}:features-$BRANCH_NAME_underscore-${{ steps.vars.outputs.sha_short }}
+    - name: Printing the branch name
+      run: echo $GITHUB_REF_NAME
+    - name: predefined envoirnment
+      run: env
     - name: "Build Changelog"
         id: build_changelog
         uses: mikepenz/release-changelog-builder-action@v3.4.0
