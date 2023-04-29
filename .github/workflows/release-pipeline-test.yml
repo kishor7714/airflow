@@ -82,16 +82,30 @@ jobs:
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
-      env:
-          GITHUB_TOKEN: Y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 # This token is provided by Actions, you do not need to create your own token
-      with:
-          tag_name: Rel_${{ env.REL_VER }}
-          #tag_name: rel-dheeraj-1
-          #release_name: rel-dheeraj-1
-          release_name: Rel_${{ env.REL_VER }}
-          body: test
-          draft: false
-          prerelease: false          
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          body: |
+            Release ${{ github.ref }}
+
+            Changes:
+            - Some change
+            - Another change
+    # - name: Create Release
+    #   id: create_release
+    #   uses: actions/create-release@v1
+    #   env:
+    #       GITHUB_TOKEN: Y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 # This token is provided by Actions, you do not need to create your own token
+    #   with:
+    #       tag_name: Rel_${{ env.REL_VER }}
+    #       #tag_name: rel-dheeraj-1
+    #       #release_name: rel-dheeraj-1
+    #       release_name: Rel_${{ env.REL_VER }}
+    #       body: test
+    #       draft: false
+    #       prerelease: false          
 
 
     # - name: Build the docker image
