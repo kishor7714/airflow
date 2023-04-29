@@ -8,7 +8,7 @@ on:
 
 jobs:
 
-  job1: 
+  job-test: 
 
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
@@ -24,23 +24,106 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - name: Printing the branch name
-      run: echo $GITHUB_REF_NAME
-    - name: predefined envoirnment
-      run: env
-    - name: Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
-          aws-secret-access-key: ${{ secrets.AWS_ACCESS_SECRET }}
-          aws-region: ap-south-1           
-    - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag ${APP_NAME}:$GITHUB_REF_NAME
-    - name: LISTING DOCKER IMAGES
-      run: docker images
-    - name: docker login
-      run: aws ecr get-login-password --region ${REGION} | docker login --username AWS --password-stdin ${AWS_REPO}
-    - name: docker tag image from airflow:test to aws ecr
-      run: docker tag airflow:$GITHUB_REF_NAME 716884131628.dkr.ecr.ap-south-1.amazonaws.com/${APP_NAME}:$GITHUB_REF_NAME      
-    - name: docker push
-      run: docker push ${AWS_REPO}/${APP_NAME}:$GITHUB_REF_NAME
+    # - name: Declare some variables
+    #   id: vars
+    #   shell: bash
+    #   run: |
+    #     echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+    #     echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+    # - name: Printing the branch name
+    #   run: echo ${{ steps.vars.outputs.sha_short }}
+    # - name: predefined envoirnment
+    #   run: env
+    # - name: Configure AWS Credentials
+    #   uses: aws-actions/configure-aws-credentials@v1
+    #   with:
+    #       aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+    #       aws-secret-access-key: ${{ secrets.AWS_ACCESS_SECRET }}
+    #       aws-region: ap-south-1
+    # - name: Set major release
+    #     #if: ${{ github.event.label.name == 'release-major' }}
+    #     run: |
+    #       #echo "RELEASE=major" >> $GITHUB_ENV
+    #       myyear=`date +'%y'` #Y for 2022 y for 22
+    #       echo "myyear=${myyear}" >> $GITHUB_ENV
+    #       echo "year" ${myyear} set
+          
+    # - name: Set minor release
+    #     #if: ${{ github.event.label.name == 'release-minor' }}
+    #     run: |
+    #       #echo "RELEASE=minor" >> $GITHUB_ENV
+    #       week=$(date +%V)
+    #       echo "week=${week}" >> $GITHUB_ENV
+    #       echo "week" ${week} set
+    # - name: Set owner and repo name
+    #     run: |
+    #       echo "OWNER=withmehealth" >> $GITHUB_ENV
+    #       echo "REPO=${GITHUB_REPOSITORY#*/}" >> $GITHUB_ENV
+    # - name: Check if release tag already exist - if exist add patch by +1
+    #     run: |
+    #       echo "OWNER" $OWNER
+    #       echo "REPO" $REPO
+    #       echo "GITHUB_TOKEN" ${GITHUB_TOKEN}
+    #       echo "$(pwd)"
+    #       cat $GITHUB_ENV
+    #       curl \
+    #           -H "Accept: application/vnd.github+json" \
+    #           -H "Authorization: Bearer Y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" \
+    #           https://api.github.com/repos/$OWNER/$REPO/tags | sed 's/[][]//g' | grep name | sed 's/^.............//' | sed 's/..$//' > version-list.txt
+    #       echo "version list as below"
+    #       cat version-list.txt
+    #       bash release-pipeline-script.sh
+    #       echo "Github Env variables after script execution that sets the version"
+    #       cat $GITHUB_ENV
+    #       echo "all done exiting"                   
+
+    # - name: Build the docker image
+    #   shell: bash
+    #   env:
+    #     PROJECT_NAME: ${{ github.event.repository.name }}
+    #     BRANCH_NAME: ${{ steps.vars.outputs.branch }}
+    #     COMMIT_HASH: ${{ github.sha }}
+    #   run: |
+    #     echo "Branch: ${{ steps.vars.outputs.branch }}"
+    #     echo "BRANCH_NAME: ${BRANCH_NAME}"
+    #     echo "Sha: ${{ steps.vars.outputs.sha_short }}"
+    #     echo $BRANCH_NAME
+    #     BRANCH_NAME=${BRANCH_NAME#"features/"}
+    #     echo "BRANCH_NAME: ${BRANCH_NAME}"
+    #     BRANCH_NAME=$(echo $BRANCH_NAME| awk '{print tolower($0)}')
+    #     echo "BRANCH_NAME in lower case: ${BRANCH_NAME}"
+    #     BRANCH_NAME_underscore=$(echo $BRANCH_NAME| tr '-' '_')
+    #     echo $BRANCH_NAME_underscore
+    #     docker build . --file Dockerfile --tag ${APP_NAME}:features-$BRANCH_NAME_underscore-${{ steps.vars.outputs.sha_short }}
+    # - name: Printing the branch name
+    #   run: echo $GITHUB_REF_NAME
+    # - name: predefined envoirnment
+    #   run: env
+    # - name: "Build Changelog"
+    #     id: build_changelog
+    #     uses: mikepenz/release-changelog-builder-action@v3.4.0
+    #     env:
+    #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # - name: Create Release
+      #   id: create_release
+      #   uses: actions/create-release@v1
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+      #   with:
+      #     tag_name: Rel_${{ env.REL_VER }}
+      #     #tag_name: rel-dheeraj-1
+      #     #release_name: rel-dheeraj-1
+      #     release_name: Rel_${{ env.REL_VER }}
+      #     body: ${{steps.build_changelog.outputs.changelog}}
+      #     draft: false
+      #     prerelease: false          
+    # - name: Build the Docker image
+    #   run: docker build . --file Dockerfile --tag ${APP_NAME}:$GITHUB_REF_NAME
+    # - name: LISTING DOCKER IMAGES
+    #   run: docker images
+    # - name: docker login
+    #   run: aws ecr get-login-password --region ${REGION} | docker login --username AWS --password-stdin ${AWS_REPO}
+    # - name: docker tag image from airflow:test to aws ecr
+    #   run: docker tag airflow:$GITHUB_REF_NAME 716884131628.dkr.ecr.ap-south-1.amazonaws.com/${APP_NAME}:$GITHUB_REF_NAME      
+    # - name: docker push
+    #   run: docker push ${AWS_REPO}/${APP_NAME}:$GITHUB_REF_NAME

@@ -1,0 +1,101 @@
+name: Feature Pipeline CI
+ 
+on:
+  push:
+    branches: [ "features/*" ]
+  # pull_request:
+  #   branches: [ "features/*" ]
+
+jobs:
+
+  job-features: 
+
+    runs-on: ubuntu-latest
+    env:
+        JAVA_VERSION: '11'
+        DOCKER_REPO: 'airflow'
+        DOCKER_ACCOUNT: 'kishore7714'
+        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        DOCKER_USERNAME: 'kishore7714@gmail.com'
+        APP_NAME: 'airflow'
+        AWS_REPO: '716884131628.dkr.ecr.ap-south-1.amazonaws.com'
+        REGION: 'ap-south-1'
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Declare some variables
+      id: vars
+      shell: bash
+      run: |
+        echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+    - name: Printing the branch name
+      run: echo ${{ steps.vars.outputs.sha_short }}
+    - name: predefined envoirnment
+      run: env
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_ACCESS_SECRET }}
+          aws-region: ap-south-1           
+    - name: Build the docker image
+      shell: bash
+      env:
+        PROJECT_NAME: ${{ github.event.repository.name }}
+        BRANCH_NAME: ${{ steps.vars.outputs.branch }}
+        COMMIT_HASH: ${{ github.sha }}
+      run: |
+        echo "Branch: ${{ steps.vars.outputs.branch }}"
+        echo "BRANCH_NAME: ${BRANCH_NAME}"
+        echo "Sha: ${{ steps.vars.outputs.sha_short }}"
+        echo $BRANCH_NAME
+        BRANCH_NAME=${BRANCH_NAME#"features/"}
+        echo "BRANCH_NAME: ${BRANCH_NAME}"
+        BRANCH_NAME=$(echo $BRANCH_NAME| awk '{print tolower($0)}')
+        echo "BRANCH_NAME in lower case: ${BRANCH_NAME}"
+        BRANCH_NAME_underscore=$(echo $BRANCH_NAME| tr '-' '_')
+        echo $BRANCH_NAME_underscore
+        docker build . --file Dockerfile --tag ${APP_NAME}:features-$BRANCH_NAME_underscore-${{ steps.vars.outputs.sha_short }}
+    - name: LISTING DOCKER IMAGES
+      run: docker images
+    - name: docker login
+      run: aws ecr get-login-password --region ${REGION} | docker login --username AWS --password-stdin ${AWS_REPO}
+    - name: docker tag image from airflow:features/* to aws ecr
+      shell: bash
+      env:
+        PROJECT_NAME: ${{ github.event.repository.name }}
+        BRANCH_NAME: ${{ steps.vars.outputs.branch }}
+        COMMIT_HASH: ${{ github.sha }}
+      run: |
+        echo "Branch: ${{ steps.vars.outputs.branch }}"
+        echo "BRANCH_NAME: ${BRANCH_NAME}"
+        echo "Sha: ${{ steps.vars.outputs.sha_short }}"
+        echo $BRANCH_NAME
+        BRANCH_NAME=${BRANCH_NAME#"features/"}
+        echo "BRANCH_NAME: ${BRANCH_NAME}"
+        BRANCH_NAME=$(echo $BRANCH_NAME| awk '{print tolower($0)}')
+        echo "BRANCH_NAME in lower case: ${BRANCH_NAME}"
+        BRANCH_NAME_underscore=$(echo $BRANCH_NAME| tr '-' '_')
+        echo $BRANCH_NAME_underscore
+        docker tag ${APP_NAME}:features-$BRANCH_NAME_underscore-${{ steps.vars.outputs.sha_short }} 716884131628.dkr.ecr.ap-south-1.amazonaws.com/${APP_NAME}:features-$BRANCH_NAME_underscore-${{ steps.vars.outputs.sha_short }}      
+        docker tag ${APP_NAME}:features-$BRANCH_NAME_underscore-${{ steps.vars.outputs.sha_short }} 716884131628.dkr.ecr.ap-south-1.amazonaws.com/${APP_NAME}:features-latest
+    - name: docker push
+      shell: bash
+      env:
+        PROJECT_NAME: ${{ github.event.repository.name }}
+        BRANCH_NAME: ${{ steps.vars.outputs.branch }}
+        COMMIT_HASH: ${{ github.sha }}
+      run: |
+        echo "Branch: ${{ steps.vars.outputs.branch }}"
+        echo "BRANCH_NAME: ${BRANCH_NAME}"
+        echo "Sha: ${{ steps.vars.outputs.sha_short }}"
+        echo $BRANCH_NAME
+        BRANCH_NAME=${BRANCH_NAME#"features/"}
+        echo "BRANCH_NAME: ${BRANCH_NAME}"
+        BRANCH_NAME=$(echo $BRANCH_NAME| awk '{print tolower($0)}')
+        echo "BRANCH_NAME in lower case: ${BRANCH_NAME}"
+        BRANCH_NAME_underscore=$(echo $BRANCH_NAME| tr '-' '_')
+        echo $BRANCH_NAME_underscore
+        docker push ${AWS_REPO}/${APP_NAME}:features-$BRANCH_NAME_underscore-${{ steps.vars.outputs.sha_short }}
+        docker push ${AWS_REPO}/${APP_NAME}:features-latest
