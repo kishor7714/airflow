@@ -89,7 +89,7 @@ jobs:
           #tag_name: rel-dheeraj-1
           #release_name: rel-dheeraj-1
           release_name: Rel_${{ env.REL_VER }}
-          # body: ${{steps.build_changelog.outputs.changelog}}
+          body: test
           draft: false
           prerelease: false          
 
