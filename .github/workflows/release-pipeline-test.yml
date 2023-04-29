@@ -47,34 +47,33 @@ jobs:
           echo "myyear=${myyear}" >> $GITHUB_ENV
           echo "year" ${myyear} set
           
-    # - name: Set minor release
-    #     #if: ${{ github.event.label.name == 'release-minor' }}
-    #     run: |
-    #       #echo "RELEASE=minor" >> $GITHUB_ENV
-    #       week=$(date +%V)
-    #       echo "week=${week}" >> $GITHUB_ENV
-    #       echo "week" ${week} set
-    # - name: Set owner and repo name
-    #     run: |
-    #       echo "OWNER=withmehealth" >> $GITHUB_ENV
-    #       echo "REPO=${GITHUB_REPOSITORY#*/}" >> $GITHUB_ENV
-    # - name: Check if release tag already exist - if exist add patch by +1
-    #     run: |
-    #       echo "OWNER" $OWNER
-    #       echo "REPO" $REPO
-    #       echo "GITHUB_TOKEN" ${GITHUB_TOKEN}
-    #       echo "$(pwd)"
-    #       cat $GITHUB_ENV
-    #       curl \
-    #           -H "Accept: application/vnd.github+json" \
-    #           -H "Authorization: Bearer Y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" \
-    #           https://api.github.com/repos/$OWNER/$REPO/tags | sed 's/[][]//g' | grep name | sed 's/^.............//' | sed 's/..$//' > version-list.txt
-    #       echo "version list as below"
-    #       cat version-list.txt
-    #       bash release-pipeline-script.sh
-    #       echo "Github Env variables after script execution that sets the version"
-    #       cat $GITHUB_ENV
-    #       echo "all done exiting"                   
+    - name: Set minor release
+        #if: ${{ github.event.label.name == 'release-minor' }}
+      run: |
+          week=$(date +%V)
+          echo "week=${week}" >> $GITHUB_ENV
+          echo "week" ${week} set
+    - name: Set owner and repo name
+      run: |
+          echo "OWNER=withmehealth" >> $GITHUB_ENV
+          echo "REPO=${GITHUB_REPOSITORY#*/}" >> $GITHUB_ENV
+    - name: Check if release tag already exist - if exist add patch by +1
+      run: |
+          echo "OWNER" $OWNER
+          echo "REPO" $REPO
+          echo "GITHUB_TOKEN" ${GITHUB_TOKEN}
+          echo "$(pwd)"
+          cat $GITHUB_ENV
+          curl \
+              -H "Accept: application/vnd.github+json" \
+              -H "Authorization: Bearer Y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" \
+              https://api.github.com/repos/$OWNER/$REPO/tags | sed 's/[][]//g' | grep name | sed 's/^.............//' | sed 's/..$//' > version-list.txt
+          echo "version list as below"
+          cat version-list.txt
+          bash release-pipeline-script.sh
+          echo "Github Env variables after script execution that sets the version"
+          cat $GITHUB_ENV
+          echo "all done exiting"                   
 
     # - name: Build the docker image
     #   shell: bash
