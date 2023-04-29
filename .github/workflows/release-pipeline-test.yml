@@ -40,13 +40,12 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.AWS_ACCESS_SECRET }}
           aws-region: ap-south-1
-    # - name: Set major release
-    #     #if: ${{ github.event.label.name == 'release-major' }}
-    #     run: |
-    #       #echo "RELEASE=major" >> $GITHUB_ENV
-    #       myyear=`date +'%y'` #Y for 2022 y for 22
-    #       echo "myyear=${myyear}" >> $GITHUB_ENV
-    #       echo "year" ${myyear} set
+    - name: Set major release
+      run: |
+          #echo "RELEASE=major" >> $GITHUB_ENV
+          myyear=`date +'%y'` #Y for 2022 y for 22
+          echo "myyear=${myyear}" >> $GITHUB_ENV
+          echo "year" ${myyear} set
           
     # - name: Set minor release
     #     #if: ${{ github.event.label.name == 'release-minor' }}
