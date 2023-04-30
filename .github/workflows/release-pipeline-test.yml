@@ -66,7 +66,7 @@ jobs:
           cat $GITHUB_ENV
           curl \
               -H "Accept: application/vnd.github+json" \
-              -H "Authorization: Bearer Y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" \
+              -H "Authorization: Bearer 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" \
               https://api.github.com/repos/$OWNER/$REPO/tags | sed 's/[][]//g' | grep name | sed 's/^.............//' | sed 's/..$//' > version-list.txt
           echo "version list as below"
           cat version-list.txt
@@ -85,10 +85,10 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: Rel_${{ github.run_id }}
-        release_name: Rel_${{ github.run_id }}
+        tag_name: Rel_${{ env.REL_VER }}
+        release_name: Rel_${{ env.REL_VER }}
         body: |
-            Rel_${{ github.run_id }}
+            Rel_${{ env.REL_VER }}
 
             Changes:
             - Some change
