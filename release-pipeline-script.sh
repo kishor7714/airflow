@@ -1,5 +1,5 @@
 #!/bin/bash
-input=version-list.txt
+input=version-list_2.txt
 echo "input file" $input
 myyear=`date +'%y'`
 week=$(date +%V)
