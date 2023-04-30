@@ -38,5 +38,5 @@ if [[ "$REL_VER_EXIST" == false  ]]; then
     echo "no 00 exist so patch set to 00"
     newversion=${myyear}.${week}.00
     echo "newversion" $newversion
-    echo "REL_VER=${newversion}" >> $GITHUB_ENV
+    echo "REL_VER=${newversion}" >> $GITHUB_ENV
 fi
