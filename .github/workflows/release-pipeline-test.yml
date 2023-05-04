@@ -1,17 +1,5 @@
 name: release pipeline test
- 
-# on:
-#   workflow_dispatch:
-#     # Inputs the workflow accepts.
-#     inputs:
-#       name:
-#         # Friendly description to be shown in the UI instead of 'name'
-#         description: 'Person to greet'
-#         # Default value if no value is explicitly provided
-#         default: 'World'
-#         # Input has to be provided for the workflow to run
-#         required: true
-        
+         
 on:
   push:
     branches: [ "main" ]
@@ -35,11 +23,7 @@ jobs:
         AWS_REPO: '716884131628.dkr.ecr.ap-south-1.amazonaws.com'
         REGION: 'ap-south-1'
 
-    steps:
-    # Runs a single command using the runners shell
-    # - name: Send greeting
-    #   run: echo "Hello ${{ github.event.inputs.name }}"   
-     
+    steps:  
     - uses: actions/checkout@v3
     - name: Declare some variables
       id: vars
