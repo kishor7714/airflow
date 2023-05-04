@@ -1,5 +1,5 @@
 name: release pipeline test
- 
+         
 on:
   push:
     branches: [ "main" ]
@@ -12,6 +12,7 @@ jobs:
     permissions: write-all
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
+    
     env:
         JAVA_VERSION: '11'
         DOCKER_REPO: 'airflow'
@@ -22,7 +23,7 @@ jobs:
         AWS_REPO: '716884131628.dkr.ecr.ap-south-1.amazonaws.com'
         REGION: 'ap-south-1'
 
-    steps:
+    steps:  
     - uses: actions/checkout@v3
     - name: Declare some variables
       id: vars
