@@ -11,6 +11,7 @@ on:
         default: 'World'
         # Input has to be provided for the workflow to run
         required: true
+        
 # on:
 #   push:
 #     branches: [ "main" ]
