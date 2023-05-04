@@ -25,11 +25,6 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     
-    steps:
-    # Runs a single command using the runners shell
-    - name: Send greeting
-      run: echo "Hello ${{ github.event.inputs.name }}"
-    
     env:
         JAVA_VERSION: '11'
         DOCKER_REPO: 'airflow'
@@ -41,6 +36,9 @@ jobs:
         REGION: 'ap-south-1'
 
     steps:
+    # Runs a single command using the runners shell
+    - name: Send greeting
+      run: echo "Hello ${{ github.event.inputs.name }}"    
     - uses: actions/checkout@v3
     - name: Declare some variables
       id: vars
