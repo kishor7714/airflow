@@ -14,17 +14,17 @@ on:
 
       FROM_DATE: # TOPIC should go here
         # Friendly description to be shown in the UI instead of 'name'
-        description: 'Format %Y-%m-%d_%H:%M:%S.      (UTC)'
+        description: 'Format %Y-%m-%d.      (UTC)'
         # Default value if no value is explicitly provided
-        default: '2021-MM-DD_H:M:S'
+        default: '2021-MM-DD'
         # Input has to be provided for the workflow to run
         required: true
 
       TO_DATE: # TOPIC should go here
         # Friendly description to be shown in the UI instead of 'name'
-        description: 'Format %Y-%m-%d_%H:%M:%S.     (UTC)'
+        description: 'Format %Y-%m-%d.     (UTC)'
         # Default value if no value is explicitly provided
-        default: '2021-MM-DD_H:M:S'
+        default: '2021-MM-DD'
         # Input has to be provided for the workflow to run
         required: true        
         
@@ -35,8 +35,6 @@ jobs:
     runs-on: ubuntu-20.04
 
     env:
-      FROM_TIME: $(date -d "12:00 AM" +%H:%M:%S)
-      TO_TIME: $(date -d "11:59 PM" +%H:%M:%S)
       TOPIC: ${{ github.event.inputs.TOPIC }}
       FROM_DATE: ${{ github.event.inputs.FROM_DATE }}
       TO_DATE: ${{ github.event.inputs.TO_DATE }}
@@ -68,6 +66,8 @@ jobs:
     #       aws-region: us-east-1    
     - name: TOPIC
       run: |
+        FROM_TIME=$(date -d "12:00 AM" +%H:%M:%S)
+        TO_TIME=$(date -d "11:59 PM" +%H:%M:%S)      
         rm -rf devops-automatization
         rm -rf output
         echo $TOPIC , $FROM_DATE , $TO_DATE , $FROM_TIME and $TO_TIME
