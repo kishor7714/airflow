@@ -70,7 +70,7 @@ jobs:
       run: |
         rm -rf devops-automatization
         rm -rf output
-        echo TOPIC , FROM_DATE , TO_DATE , FROM_TIME and TO_TIME
+        echo $TOPIC , $FROM_DATE , $TO_DATE , $FROM_TIME and $TO_TIME
         
         ##GIT_SSH_COMMAND="ssh -i /root/.ssh/withme-devops-github" git clone git@github.com:withmehealth/devops-automatization.git
         ls .
