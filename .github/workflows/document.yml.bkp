@@ -1,0 +1,59 @@
+
+task : migrate a pipeline from jenkins to actions ( github actions ) 
+
+name tool-kafka-clean-topic
+
+variables : TOPIC
+default value: topic1
+description: Topic to clean
+
+
+script as below  ( list of cmds that should execute in a step ) 
+
+partitions=20
+replication_factor=2
+topic=$TOPIC
+#kubectl -n kafka exec -it kafka-0 -c kafka-broker -- bash -c "unset JMX_PORT && sh usr/bin/kafka-topics --zookeeper kafka-zookeeper:2181 --delete --topic ${topic}" || echo "Topic doesn't exist"
+sleep 30
+#kubectl -n kafka exec -it kafka-0 -c kafka-broker -- bash -c "unset JMX_PORT && sh usr/bin/kafka-topics --zookeeper kafka-zookeeper:2181 --delete --topic ${topic}" || echo "Topic doesn't exist"
+sleep 30
+#kubectl -n kafka exec -it kafka-0 -c kafka-broker -- bash -c "unset JMX_PORT && sh usr/bin/kafka-topics --zookeeper kafka-zookeeper:2181 --create --topic ${topic} --partitions ${partitions} --replication-factor ${replication_factor}" || echo "Topic already exist"
+#kubectl -n kafka exec -it kafka-0 -c kafka-broker -- bash -c "unset JMX_PORT && sh usr/bin/kafka-topics --zookeeper kafka-zookeeper:2181 --describe --topic ${topic}" || echo "Topic doesn't exist"
+
+
+
+
+hints :
+
+add echo $TOPIC to verify your i/p ( input ) 
+add more echo statements 
+
+
+to add a input variable add like below at top of yaml file 
+
+name: Release-Pipeline-DEMO
+
+# Controls when the workflow will run
+on:
+# Triggers the workflow on push or pull request events but only for the "main" branch
+
+# Allows you to run this workflow manually from the Actions tab
+workflow_dispatch:
+# Inputs the workflow accepts.
+inputs:
+REL_VER: <-- TOPIC should go here 
+# Friendly description to be shown in the UI instead of 'name'
+description: 'Pass the Release branch name'
+# Default value if no value is explicitly provided
+default: 'dev'
+# Input has to be provided for the workflow to run
+required: true
+
+
+
+your inout name will be TOPIC
+
+default will be topic1
+
+
+then manually invoke the pipeline and pass diff topic name and see its prinitng in output of pipeline 

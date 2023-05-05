@@ -1,0 +1,130 @@
+name: Release-Pipeline-DEMO
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the "main" branch
+  push:
+    branches: [ "main" ]  
+    
+  # # Allows you to run this workflow manually from the Actions tab
+  # workflow_dispatch:
+  #   # Inputs the workflow accepts.
+  #   inputs:
+  #     REL_VER: <-- TOPIC should go here 
+  #     # Friendly description to be shown in the UI instead of 'name'
+  #     description: 'Person to greet'
+  #     # Default value if no value is explicitly provided
+  #     default: 'World'
+  #     # Input has to be provided for the workflow to run
+  #     required: true
+
+jobs:
+  Release-Pipeline-DEMO:
+    # runs-on: [ self-hosted,dev ]
+    runs-on: ubuntu-20.04
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3 
+      with:
+        fetch-depth: 0
+    - name: Installing dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y jq awscli postgresql-client
+        jq --version
+        echo "jq installed"
+        aws --version
+        echo "aws installed"
+    # - name: Set ENV_E2E Environment Variable
+    #   run: |
+    #     export ENV_E2E=$(cat .env.local | grep "ENV=" | cut -d"=" -f2)
+    #     echo "ENV_E2E is set to $ENV_E2E"
+      # Configure AWS Credential
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+          aws-access-key-id: ${{ secrets.JENKINS_E2E_AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.JENKINS_E2E_AWS_ACCESS_SECRET }}
+          aws-region: us-east-1    
+
+
+
+    - name: Release-Pipeline-DEMO
+      env:
+        WITHME_DEVOPS_GITHUB: ${{ secrets.WITHME_DEVOPS_GITHUB }}
+        PG_PASSWORD: ${{ secrets.FORMULARY_DB_TEST_POSTGRES_PWD }}
+        PG_USER: "postgres"
+        ENV_K8s: "dev"
+      run: |
+        if [[ ${{ github.ref }} == "refs/heads/main" || ${{ github.ref }} == "refs/heads/test" || ${{ github.ref }} == "refs/heads/demo" ]]; then
+
+        DATABASE_NAMES=$(PGPASSWORD=${PG_PASSWORD} \
+                psql -h postgres.postgres.svc.cluster.local \
+                -U ${PG_USER} -t \
+                -c "SELECT datname FROM pg_database \
+                WHERE datistemplate = false AND datname <> 'postgres';")
+
+        for DBNAME in  ${DATABASE_NAMES}
+        do
+            dbenv=`echo -n "$DBNAME" | awk -F'-' '{print $(NF)}'`;
+            if [[ ${dbenv} != ${ENV_K8s} ]]
+            then
+              continue
+            fi
+            echo $DBNAME
+            
+            if [[ ${ENV_K8s} == 'test' ]]
+            then
+              role_prefix='qa'
+            else
+              role_prefix='dev'
+            fi
+            
+            
+            PGPASSWORD=${PG_PASSWORD} psql -h postgres.postgres.svc.cluster.local -U ${PG_USER} $DBNAME -c \
+            "DO \$$
+            
+            declare db_owner TEXT;
+            
+            BEGIN
+              GRANT SELECT ON ALL TABLES IN SCHEMA public TO readonly_role;
+              GRANT SELECT ON ALL SEQUENCES in SCHEMA public TO readonly_role;
+              GRANT EXECUTE ON ALL FUNCTIONS in SCHEMA public TO readonly_role;
+              
+              GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO ${role_prefix}_all_role; 
+              GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO ${role_prefix}_all_role;
+              GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO ${role_prefix}_all_role;
+              
+              GRANT ${role_prefix}_all_role to ${role_prefix}_admins_role;
+              
+              Alter default privileges for role \"$DBNAME\" in schema public grant select on tables to readonly_role;
+              Alter default privileges for role \"$DBNAME\" in schema public GRANT SELECT on SEQUENCES TO readonly_role;
+              Alter default privileges for role \"$DBNAME\" in schema public grant execute on functions to readonly_role;
+              ALTER DEFAULT PRIVILEGES for role \"$DBNAME\" in schema public GRANT ALL privileges ON TABLES TO ${role_prefix}_all_role;
+              ALTER DEFAULT PRIVILEGES for role \"$DBNAME\" in schema public GRANT ALL privileges ON SEQUENCES TO ${role_prefix}_all_role;
+              Alter default privileges for role \"$DBNAME\" in schema public grant execute on functions to ${role_prefix}_all_role;
+          END;
+          \$$ LANGUAGE plpgsql;"
+        done
+
+        fi
+    # - name: Notify Slack
+    #   if: failure()
+    #   env:
+    #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+    #     SLACK_CHANNEL: ${{ env.SLACK_CHANNEL }}
+    #   run: |
+    #     curl -X POST -H 'Content-type: application/json' \
+    #     --data '{"channel": "'"${SLACK_CHANNEL}"'", "text":"Workflow failed!"}' \
+    #     $SLACK_WEBHOOK_URL
+    # - name: Notify Slack
+    #   if: always()
+    #   env:
+    #     JENKINS_SLACK_WEBHOOK_URL: ${{ secrets.JENKINS_SLACK_WEBHOOK_URL }}
+    #     SLACK_CHANNEL: ${{ env.SLACK_CHANNEL }}
+    #   run: |
+    #     branch=$(echo "${{ github.ref }}" | awk -F/ '{print toupper($NF)}')
+    #     curl -X POST -H 'Content-type: application/json' \
+    #     --data '{"channel": "'"${SLACK_CHANNEL}"'", "text":" '"${branch}"' E2E Workflow completed successfully!"}' \
+    #     $JENKINS_SLACK_WEBHOOK_URL
