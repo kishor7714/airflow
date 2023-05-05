@@ -63,7 +63,7 @@ jobs:
         rm -rf devops-automatization
         rm -rf output
         
-        echo $TOPIC , $FROM_DATE 
+        echo $CHANNEL_ID , $FROM_DATE 
         
         ##GIT_SSH_COMMAND="ssh -i /root/.ssh/withme-devops-github" git clone git@github.com:withmehealth/devops-automatization.git
         #cd devops-automatization/slack
