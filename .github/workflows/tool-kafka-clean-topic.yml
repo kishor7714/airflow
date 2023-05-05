@@ -6,17 +6,17 @@ on:
   push:
     branches: [ "main" ]  
     
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
-    # Inputs the workflow accepts.
-    inputs:
-      REL_VER: <-- TOPIC should go here 
-      # Friendly description to be shown in the UI instead of 'name'
-      description: 'Person to greet'
-      # Default value if no value is explicitly provided
-      default: 'World'
-      # Input has to be provided for the workflow to run
-      required: true
+  # # Allows you to run this workflow manually from the Actions tab
+  # workflow_dispatch:
+  #   # Inputs the workflow accepts.
+  #   inputs:
+  #     REL_VER: <-- TOPIC should go here 
+  #     # Friendly description to be shown in the UI instead of 'name'
+  #     description: 'Person to greet'
+  #     # Default value if no value is explicitly provided
+  #     default: 'World'
+  #     # Input has to be provided for the workflow to run
+  #     required: true
 
 jobs:
   Release-Pipeline-DEMO:
