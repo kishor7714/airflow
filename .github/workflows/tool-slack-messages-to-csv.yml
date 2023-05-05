@@ -1,0 +1,93 @@
+name: tool-slack-messages-to-csv
+
+# Controls when the workflow will run
+on:
+  workflow_dispatch:
+    inputs:
+      CHANNEL_ID: # TOPIC should go here
+        # Friendly description to be shown in the UI instead of 'name'
+        description: "C01HDA2SELV (prod-500's channel)"
+        # Default value if no value is explicitly provided
+        default: 'C01HDA2SELV'
+        # Input has to be provided for the workflow to run
+        required: true
+
+      FROM_DATE: # TOPIC should go here
+        # Friendly description to be shown in the UI instead of 'name'
+        description: 'Format %Y-%m-%d.      (UTC)'
+        # Default value if no value is explicitly provided
+        default: '2021-MM-DD'
+        # Input has to be provided for the workflow to run
+        required: true     
+        
+
+jobs:
+  tool-slack-messages-to-csv:
+    # runs-on: [ self-hosted,dev ]
+    runs-on: ubuntu-20.04
+
+    env:
+      TOPIC: ${{ github.event.inputs.TOPIC }}
+      FROM_DATE: ${{ github.event.inputs.FROM_DATE }}
+      TO_DATE: ${{ github.event.inputs.TO_DATE }}
+      DOCKER_REPO: 'airflow'
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3 
+      with:
+        fetch-depth: 0
+    - name: Installing dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y jq awscli postgresql-client
+        jq --version
+        echo "jq installed"
+        aws --version
+        echo "aws installed"
+    # - name: Set ENV_E2E Environment Variable
+    #   run: |
+    #     export ENV_E2E=$(cat .env.local | grep "ENV=" | cut -d"=" -f2)
+    #     echo "ENV_E2E is set to $ENV_E2E"
+      # Configure AWS Credential
+    # - name: Configure AWS Credentials
+    #   uses: aws-actions/configure-aws-credentials@v1
+    #   with:
+    #       aws-access-key-id: ${{ secrets.JENKINS_E2E_AWS_ACCESS_KEY }}
+    #       aws-secret-access-key: ${{ secrets.JENKINS_E2E_AWS_ACCESS_SECRET }}
+    #       aws-region: us-east-1    
+    - name: TOPIC
+      run: |
+        FROM_TIME=$(date -d "12:00 AM" +%H:%M:%S)
+        TO_TIME=$(date -d "11:59 PM" +%H:%M:%S)      
+        rm -rf devops-automatization
+        rm -rf output
+        
+        echo $TOPIC , $FROM_DATE 
+        
+        ##GIT_SSH_COMMAND="ssh -i /root/.ssh/withme-devops-github" git clone git@github.com:withmehealth/devops-automatization.git
+        #cd devops-automatization/slack
+        #python3 messages_channel.py
+        #mv output/ ../../
+        #cd ../../
+        rm -rf devops-automatization
+      
+    #       # - name: Notify Slack
+    # #   if: failure()
+    # #   env:
+    # #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+    # #     SLACK_CHANNEL: ${{ env.SLACK_CHANNEL }}
+    # #   run: |
+    # #     curl -X POST -H 'Content-type: application/json' \
+    # #     --data '{"channel": "'"${SLACK_CHANNEL}"'", "text":"Workflow failed!"}' \
+    # #     $SLACK_WEBHOOK_URL
+    # # - name: Notify Slack
+    # #   if: always()
+    # #   env:
+    # #     JENKINS_SLACK_WEBHOOK_URL: ${{ secrets.JENKINS_SLACK_WEBHOOK_URL }}
+    # #     SLACK_CHANNEL: ${{ env.SLACK_CHANNEL }}
+    # #   run: |
+    # #     branch=$(echo "${{ github.ref }}" | awk -F/ '{print toupper($NF)}')
+    # #     curl -X POST -H 'Content-type: application/json' \
+    # #     --data '{"channel": "'"${SLACK_CHANNEL}"'", "text":" '"${branch}"' E2E Workflow completed successfully!"}' \
+    # #     $JENKINS_SLACK_WEBHOOK_URL
