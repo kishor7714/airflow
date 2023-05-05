@@ -27,9 +27,8 @@ jobs:
     runs-on: ubuntu-20.04
 
     env:
-      TOPIC: ${{ github.event.inputs.TOPIC }}
+      CHANNEL_ID: ${{ github.event.inputs.CHANNEL_ID }}
       FROM_DATE: ${{ github.event.inputs.FROM_DATE }}
-      TO_DATE: ${{ github.event.inputs.TO_DATE }}
       DOCKER_REPO: 'airflow'
 
     steps:
@@ -63,7 +62,7 @@ jobs:
         rm -rf devops-automatization
         rm -rf output
         
-        echo $TOPIC , $FROM_DATE 
+        echo $CHANNEL_ID , $FROM_DATE 
         
         ##GIT_SSH_COMMAND="ssh -i /root/.ssh/withme-devops-github" git clone git@github.com:withmehealth/devops-automatization.git
         #cd devops-automatization/slack
