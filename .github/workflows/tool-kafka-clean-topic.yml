@@ -17,6 +17,10 @@ jobs:
     # runs-on: [ self-hosted,dev ]
     runs-on: ubuntu-20.04
 
+    env:
+      TOPIC: ${{ github.event.inputs.TOPIC }}
+      DOCKER_REPO: 'airflow'
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v3 
@@ -41,18 +45,18 @@ jobs:
     #       aws-access-key-id: ${{ secrets.JENKINS_E2E_AWS_ACCESS_KEY }}
     #       aws-secret-access-key: ${{ secrets.JENKINS_E2E_AWS_ACCESS_SECRET }}
     #       aws-region: us-east-1    
-
-    #     env:
-    #       partitions=20
-    #       replication_factor=2
-    #       topic=$TOPIC
-    #     run:
-    #       kubectl -n kafka exec -it kafka-0 -c kafka-broker -- bash -c "unset JMX_PORT && sh usr/bin/kafka-topics --zookeeper kafka-zookeeper:2181 --delete --topic ${topic}" || echo "Topic doesn't exist"
-    #       sleep 30
-    #       kubectl -n kafka exec -it kafka-0 -c kafka-broker -- bash -c "unset JMX_PORT && sh usr/bin/kafka-topics --zookeeper kafka-zookeeper:2181 --delete --topic ${topic}" || echo "Topic doesn't exist"
-    #       sleep 30
-    #       kubectl -n kafka exec -it kafka-0 -c kafka-broker -- bash -c "unset JMX_PORT && sh usr/bin/kafka-topics --zookeeper kafka-zookeeper:2181 --create --topic ${topic} --partitions ${partitions} --replication-factor ${replication_factor}" || echo "Topic already exist"
-    #       kubectl -n kafka exec -it kafka-0 -c kafka-broker -- bash -c "unset JMX_PORT && sh usr/bin/kafka-topics --zookeeper kafka-zookeeper:2181 --describe --topic ${topic}" || echo "Topic doesn't exist"
+    - name: TOPIC
+      run: |
+          partitions=20
+          replication_factor=2
+          topic=$TOPIC
+          echo $topic
+          # kubectl -n kafka exec -it kafka-0 -c kafka-broker -- bash -c "unset JMX_PORT && sh usr/bin/kafka-topics --zookeeper kafka-zookeeper:2181 --delete --topic ${topic}" || echo "Topic doesn't exist"
+          sleep 30
+          # kubectl -n kafka exec -it kafka-0 -c kafka-broker -- bash -c "unset JMX_PORT && sh usr/bin/kafka-topics --zookeeper kafka-zookeeper:2181 --delete --topic ${topic}" || echo "Topic doesn't exist"
+          sleep 30
+          # kubectl -n kafka exec -it kafka-0 -c kafka-broker -- bash -c "unset JMX_PORT && sh usr/bin/kafka-topics --zookeeper kafka-zookeeper:2181 --create --topic ${topic} --partitions ${partitions} --replication-factor ${replication_factor}" || echo "Topic already exist"
+          # kubectl -n kafka exec -it kafka-0 -c kafka-broker -- bash -c "unset JMX_PORT && sh usr/bin/kafka-topics --zookeeper kafka-zookeeper:2181 --describe --topic ${topic}" || echo "Topic doesn't exist"
  
     #       # - name: Notify Slack
     # #   if: failure()
