@@ -27,9 +27,8 @@ jobs:
     runs-on: ubuntu-20.04
 
     env:
-      TOPIC: ${{ github.event.inputs.TOPIC }}
+      CHANNEL_ID: ${{ github.event.inputs.CHANNEL_ID }}
       FROM_DATE: ${{ github.event.inputs.FROM_DATE }}
-      TO_DATE: ${{ github.event.inputs.TO_DATE }}
       DOCKER_REPO: 'airflow'
 
     steps:
