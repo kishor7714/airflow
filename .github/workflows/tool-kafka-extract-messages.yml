@@ -70,7 +70,7 @@ jobs:
         TO_TIME=$(date -d "11:59 PM" +%H:%M:%S)      
         rm -rf devops-automatization
         rm -rf output
-        echo "TOPIC$TOPIC , FROM_DATE$FROM_DATE , TO_DATE$TO_DATE , FROM_TIME$FROM_TIME and TO_TIME$TO_TIME"
+        echo "TOPIC $TOPIC , FROM_DATE $FROM_DATE , TO_DATE $TO_DATE , FROM_TIME $FROM_TIME and TO_TIME $TO_TIME"
         
         ##GIT_SSH_COMMAND="ssh -i /root/.ssh/withme-devops-github" git clone git@github.com:withmehealth/devops-automatization.git
         ls .
