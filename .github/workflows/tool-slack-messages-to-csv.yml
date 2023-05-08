@@ -71,22 +71,22 @@ jobs:
         #cd ../../
         rm -rf devops-automatization
       
-    #       # - name: Notify Slack
-    # #   if: failure()
-    # #   env:
-    # #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-    # #     SLACK_CHANNEL: ${{ env.SLACK_CHANNEL }}
-    # #   run: |
-    # #     curl -X POST -H 'Content-type: application/json' \
-    # #     --data '{"channel": "'"${SLACK_CHANNEL}"'", "text":"Workflow failed!"}' \
-    # #     $SLACK_WEBHOOK_URL
-    # # - name: Notify Slack
-    # #   if: always()
-    # #   env:
-    # #     JENKINS_SLACK_WEBHOOK_URL: ${{ secrets.JENKINS_SLACK_WEBHOOK_URL }}
-    # #     SLACK_CHANNEL: ${{ env.SLACK_CHANNEL }}
-    # #   run: |
-    # #     branch=$(echo "${{ github.ref }}" | awk -F/ '{print toupper($NF)}')
-    # #     curl -X POST -H 'Content-type: application/json' \
-    # #     --data '{"channel": "'"${SLACK_CHANNEL}"'", "text":" '"${branch}"' E2E Workflow completed successfully!"}' \
-    # #     $JENKINS_SLACK_WEBHOOK_URL
+          # - name: Notify Slack
+    #   if: failure()
+    #   env:
+    #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+    #     SLACK_CHANNEL: ${{ env.training-devops }}
+    #   run: |
+    #     curl -X POST -H 'Content-type: application/json' \
+    #     --data '{"channel": "'"${SLACK_CHANNEL}"'", "text":"Workflow failed!"}' \
+    #     $SLACK_WEBHOOK_URL
+    # - name: Notify Slack
+    #   if: always()
+    #   env:
+    #     JENKINS_SLACK_WEBHOOK_URL: ${{ secrets.JENKINS_SLACK_WEBHOOK_URL }}
+    #     SLACK_CHANNEL: ${{ env.SLACK_CHANNEL }}
+    #   run: |
+    #     branch=$(echo "${{ github.ref }}" | awk -F/ '{print toupper($NF)}')
+    #     curl -X POST -H 'Content-type: application/json' \
+    #     --data '{"channel": "'"${SLACK_CHANNEL}"'", "text":" '"${branch}"' E2E Workflow completed successfully!"}' \
+    #     $JENKINS_SLACK_WEBHOOK_URL
