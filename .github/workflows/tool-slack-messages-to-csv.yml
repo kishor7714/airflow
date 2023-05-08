@@ -21,6 +21,7 @@ on:
         required: true     
         
 
+
 jobs:
   tool-slack-messages-to-csv:
     # runs-on: [ self-hosted,dev ]
@@ -29,7 +30,7 @@ jobs:
     env:
       CHANNEL_ID: ${{ github.event.inputs.CHANNEL_ID }}
       FROM_DATE: ${{ github.event.inputs.FROM_DATE }}
-      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      # SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
       DOCKER_REPO: 'airflow'
 
     steps:
