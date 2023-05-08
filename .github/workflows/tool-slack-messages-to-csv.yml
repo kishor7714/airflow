@@ -29,6 +29,7 @@ jobs:
     env:
       CHANNEL_ID: ${{ github.event.inputs.CHANNEL_ID }}
       FROM_DATE: ${{ github.event.inputs.FROM_DATE }}
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
       DOCKER_REPO: 'airflow'
 
     steps:
@@ -70,16 +71,24 @@ jobs:
         #mv output/ ../../
         #cd ../../
         rm -rf devops-automatization
+
+    - name: Slack Notification
+      uses: act10ns/slack@v1
+      with: 
+        status: ${{ job.status }}
+        channel: '#training-devops'
+        message: Build {{ env.GITHUB_REF_NAME }} branch Successfully
+      if: always()        
       
-    - name: Notify Slack
-      if: failure()
-      env:
-        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-        SLACK_CHANNEL: ${{ env.training-devops }}
-      run: |
-        curl -X POST -H 'Content-type: application/json' \
-        --data '{"channel": "'"${SLACK_CHANNEL}"'", "text":"Workflow failed!"}' \
-        $SLACK_WEBHOOK_URL
+    # - name: Notify Slack
+    #   if: failure()
+    #   env:
+    #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+    #     SLACK_CHANNEL: ${{ env.training-devops }}
+    #   run: |
+    #     curl -X POST -H 'Content-type: application/json' \
+    #     --data '{"channel": "'"${SLACK_CHANNEL}"'", "text":"Workflow failed!"}' \
+    #     $SLACK_WEBHOOK_URL
     # - name: Notify Slack
     #   if: always()
     #   env:
