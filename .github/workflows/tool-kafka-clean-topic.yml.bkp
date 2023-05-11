@@ -1,0 +1,79 @@
+name: tool-kafka-clean-topic
+
+# Controls when the workflow will run
+on:
+  workflow_dispatch:
+    inputs:
+      TOPIC: # TOPIC should go here
+        # Friendly description to be shown in the UI instead of 'name'
+        description: 'Topic to clean'
+        # Default value if no value is explicitly provided
+        default: 'topic1'
+        # Input has to be provided for the workflow to run
+        required: true
+
+jobs:
+  tool-kafka-clean-topic:
+    # runs-on: [ self-hosted,dev ]
+    runs-on: ubuntu-20.04
+
+    env:
+      TOPIC: ${{ github.event.inputs.TOPIC }}
+      DOCKER_REPO: 'airflow'
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3 
+      with:
+        fetch-depth: 0
+    - name: Installing dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y jq awscli postgresql-client
+        jq --version
+        echo "jq installed"
+        aws --version
+        echo "aws installed"
+    # - name: Set ENV_E2E Environment Variable
+    #   run: |
+    #     export ENV_E2E=$(cat .env.local | grep "ENV=" | cut -d"=" -f2)
+    #     echo "ENV_E2E is set to $ENV_E2E"
+      # Configure AWS Credential
+    # - name: Configure AWS Credentials
+    #   uses: aws-actions/configure-aws-credentials@v1
+    #   with:
+    #       aws-access-key-id: ${{ secrets.JENKINS_E2E_AWS_ACCESS_KEY }}
+    #       aws-secret-access-key: ${{ secrets.JENKINS_E2E_AWS_ACCESS_SECRET }}
+    #       aws-region: us-east-1    
+    - name: TOPIC
+      run: |
+          partitions=20
+          replication_factor=2
+          topic=$TOPIC
+          echo $topic
+          # kubectl -n kafka exec -it kafka-0 -c kafka-broker -- bash -c "unset JMX_PORT && sh usr/bin/kafka-topics --zookeeper kafka-zookeeper:2181 --delete --topic ${topic}" || echo "Topic doesn't exist"
+          sleep 30
+          # kubectl -n kafka exec -it kafka-0 -c kafka-broker -- bash -c "unset JMX_PORT && sh usr/bin/kafka-topics --zookeeper kafka-zookeeper:2181 --delete --topic ${topic}" || echo "Topic doesn't exist"
+          sleep 30
+          # kubectl -n kafka exec -it kafka-0 -c kafka-broker -- bash -c "unset JMX_PORT && sh usr/bin/kafka-topics --zookeeper kafka-zookeeper:2181 --create --topic ${topic} --partitions ${partitions} --replication-factor ${replication_factor}" || echo "Topic already exist"
+          # kubectl -n kafka exec -it kafka-0 -c kafka-broker -- bash -c "unset JMX_PORT && sh usr/bin/kafka-topics --zookeeper kafka-zookeeper:2181 --describe --topic ${topic}" || echo "Topic doesn't exist"
+ 
+    #       # - name: Notify Slack
+    # #   if: failure()
+    # #   env:
+    # #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+    # #     SLACK_CHANNEL: ${{ env.SLACK_CHANNEL }}
+    # #   run: |
+    # #     curl -X POST -H 'Content-type: application/json' \
+    # #     --data '{"channel": "'"${SLACK_CHANNEL}"'", "text":"Workflow failed!"}' \
+    # #     $SLACK_WEBHOOK_URL
+    # # - name: Notify Slack
+    # #   if: always()
+    # #   env:
+    # #     JENKINS_SLACK_WEBHOOK_URL: ${{ secrets.JENKINS_SLACK_WEBHOOK_URL }}
+    # #     SLACK_CHANNEL: ${{ env.SLACK_CHANNEL }}
+    # #   run: |
+    # #     branch=$(echo "${{ github.ref }}" | awk -F/ '{print toupper($NF)}')
+    # #     curl -X POST -H 'Content-type: application/json' \
+    # #     --data '{"channel": "'"${SLACK_CHANNEL}"'", "text":" '"${branch}"' E2E Workflow completed successfully!"}' \
+    # #     $JENKINS_SLACK_WEBHOOK_URL
