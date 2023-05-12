@@ -4,7 +4,7 @@ on:
   push:
     branches: [ "features/*", "dev", "test", "demo", "prod" ]
   # pull_request:
-  #   branches: [ "dev" ]
+  #   branches: [ "dev" ] 
 
 jobs:
 
@@ -47,13 +47,13 @@ jobs:
       
 
   job-test: 
-
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/test'
     name: Deploying-${{ GITHUB_REF_NAME }}
     env:
         JAVA_VERSION: '11'
         DOCKER_REPO: 'configr'
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         DOCKER_ACCOUNT: 'kishore7714'
         DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
         DOCKER_USERNAME: 'kishore7714@gmail.com'
@@ -83,6 +83,14 @@ jobs:
       run: docker tag configr:$GITHUB_REF_NAME 716884131628.dkr.ecr.ap-south-1.amazonaws.com/${APP_NAME}:$GITHUB_REF_NAME      
     - name: docker push
       run: docker push ${AWS_REPO}/${APP_NAME}:$GITHUB_REF_NAME
+
+    - name: Slack Notification
+      uses: act10ns/slack@v1
+      with: 
+        status: ${{ job.status }}
+        channel: '#training-devops'
+        message: Build {{ env.GITHUB_REF_NAME }} branch Successfully
+      if: always()
 
   job-demo: 
 
