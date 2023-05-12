@@ -90,7 +90,7 @@ jobs:
         status: ${{ job.status }}
         channel: '#training-devops'
         message: Build {{ env.GITHUB_REF_NAME }} branch Successfully
-      if: always()      
+      if: always()
 
   job-demo: 
 
