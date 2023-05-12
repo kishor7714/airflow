@@ -50,6 +50,7 @@ jobs:
 
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/test'
+    name: Deploying-${{ GITHUB_REF_NAME }}
     env:
         JAVA_VERSION: '11'
         DOCKER_REPO: 'configr'
