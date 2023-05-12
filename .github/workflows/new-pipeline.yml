@@ -1,0 +1,31 @@
+name: new pipeline
+         
+on:
+  push:
+    branches: [ "main" ]
+  # pull_request:
+  #   branches: [ "main" ]
+
+jobs:
+    Docker-Build:
+      runs-on: [ubuntu-20.04]
+      name: Building-Docker-image
+      env:
+        GITHUB_TOKEN: ${{ secrets.DEVOPS_GITHUB_TOKEN }}
+        ENV_K8s: "test"   
+      steps:
+      - name: Checkout code
+        uses: actions/checkout@v3 
+        with:
+          fetch-depth: 0
+      - name: Installing dependencies
+        run: |
+            sudo apt update
+            sudo apt install -y jq awscli postgresql-client
+            jq --version
+            echo "jq installed"
+            aws --version
+            echo "aws installed"
+            
+            echo "${{ secrets.DEMO_KUBECONFIG }}" >> kubeconfig
+            export KUBECONFIG=$(pwd)/kubeconfig
