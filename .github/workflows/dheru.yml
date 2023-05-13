@@ -1,0 +1,247 @@
+name: Release-Pipeline-Test
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the "main" branch
+  push:
+    branches: [ "main" ]
+#   pull_request:
+#     branches: [ "main" ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  Docker-Build:
+    runs-on: [ubuntu-20.04]
+    name: Building-Docker-image
+    env:
+      GITHUB_TOKEN: ${{ secrets.DEVOPS_GITHUB_TOKEN }}
+      ENV_K8s: "test"
+    outputs:
+      my_output: ${{ steps.vars.outputs.REL_VERSION }}      
+    steps:
+      - name: Installing dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y jq
+          jq --version
+          echo "jq installed"
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0      
+      - name: Set major release
+        #if: ${{ github.event.label.name == 'release-major' }}
+        run: |
+          #echo "RELEASE=major" >> $GITHUB_ENV
+          myyear=`date +'%y'` #Y for 2022 y for 22
+          echo "myyear=${myyear}" >> $GITHUB_ENV
+          echo "year" ${myyear} set
+          
+      - name: Set minor release
+        #if: ${{ github.event.label.name == 'release-minor' }}
+        run: |
+          #echo "RELEASE=minor" >> $GITHUB_ENV
+          week=$(date +%V)
+          echo "week=${week}" >> $GITHUB_ENV
+          echo "week" ${week} set
+      - name: Set owner and repo name
+        run: |
+          echo "OWNER=withmehealth" >> $GITHUB_ENV
+          echo "REPO=${GITHUB_REPOSITORY#*/}" >> $GITHUB_ENV         
+      - name: Check if release tag already exist - if exist add patch by +1
+        env:
+          GITHUB_TOKEN: ${{ secrets.DEVOPS_GITHUB_TOKEN }}      
+        run: |
+          echo "OWNER" $OWNER
+          echo "REPO" $REPO
+          echo "GITHUB_TOKEN" ${GITHUB_TOKEN}
+          echo "$(pwd)"
+          cat $GITHUB_ENV
+          curl \
+          -H "Accept: application/vnd.github+json" \
+          -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+          https://api.github.com/repos/$OWNER/$REPO/tags | sed 's/[][]//g' | grep name | sed 's/^.............//' | sed 's/..$//' > version-list.txt
+          echo "version list as below"
+          cat version-list.txt
+          bash release-pipeline-script.sh
+          echo "Github Env variables after script execution that sets the version"
+          cat $GITHUB_ENV
+          echo "all done exiting"
+      - name: "Build Changelog"
+        id: build_changelog
+        uses: mikepenz/release-changelog-builder-action@v3.4.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+#       - name: Prepare description
+#         run: |
+#           csplit -s CHANGELOG.md "/##/" {1}
+#           cat xx01 > CHANGELOG.tmp
+#       - name: Prepare tag
+#         run: |
+#           export TAG=$(head -1 CHANGELOG.tmp | cut -d' ' -f2)
+#           echo "TAG=$TAG" >> $GITHUB_ENV
+#       - name: Create Release
+#         uses: actions/create-release@v1
+#         env:
+#           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#         with:
+#           tag_name: ${{ env.TAG }}
+#           release_name: ${{ env.TAG }}
+#           body_path: CHANGELOG.tmp
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+        with:
+          tag_name: Rel_${{ env.REL_VER }}
+          #tag_name: rel-dheeraj-1
+          #release_name: rel-dheeraj-1
+          release_name: Rel_${{ env.REL_VER }}
+          body: ${{steps.build_changelog.outputs.changelog}}
+          draft: false
+          prerelease: false
+      - name: Declare some variables
+        id: vars
+        shell: bash
+        run: |
+          echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+          echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+          echo "##[set-output name=REL_VERSION;]$(echo ${REL_VER})"
+      - name: Build docker image
+        shell: bash
+        env:
+          WITHME_DEVOPS_GITHUB: ${{ secrets.WITHME_DEVOPS_GITHUB }}
+          DOCKER_TAG: ${{ steps.vars.outputs.branch }}-${{ steps.vars.outputs.sha_short }}
+          COMMIT_HASH: ${{ github.sha }}
+          PROJECT_NAME: ${{ github.event.repository.name }}
+          BRANCH_NAME: ${{ steps.vars.outputs.branch }}
+          AWS_ECR: ${{ secrets.AWS_ECR }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          echo "$WITHME_DEVOPS_GITHUB" >> withme_devops_github.pem
+          chmod 600 withme_devops_github.pem
+          path_key=$(pwd)/withme_devops_github.pem
+          cp $path_key withme-devops-github
+          echo "AWS_ACCESS_KEY_ID"
+          echo "#######"
+          echo ${{secrets.AWS_ACCESS_KEY_ID}} | sed 's/./& /g'
+          GIT_SSH_COMMAND="ssh -i ${path_key}" git clone git@github.com:withmehealth/kubernetes-configuration.git
+          GIT_SSH_COMMAND="ssh -i ${path_key}" git clone git@github.com:withmehealth/bootstrapper-init.git
+          export NAMESPACE=$ENV_K8s
+          echo "Printing ENV"
+          echo $ENV
+          #New
+          cp kubernetes-configuration/scripts/docker_build_push.sh ./
+          bash docker_build_push.sh $AWS_ECR $PROJECT_NAME $COMMIT_HASH Rel_${{ env.REL_VER }}          
+
+  Docker-Image-Deploy:
+    runs-on: [ self-hosted,dev ]
+    needs: Docker-Build
+    name: Deploying-Rel_${{ needs.Docker-Build.outputs.my_output }}
+    env:
+      GITHUB_TOKEN: ${{ secrets.DEVOPS_GITHUB_TOKEN }}
+      ENV_K8s: "test"
+    steps:     
+      - name: Installing dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y jq python-is-python3 awscli curl
+          jq --version
+          echo "jq installed"
+          echo "python version" 
+          python --version
+          pip install jinja2 pyyaml==5.4.1
+          echo "installed"
+      - name: Deploy docker image
+        shell: bash
+        env:
+          WITHME_DEVOPS_GITHUB: ${{ secrets.WITHME_DEVOPS_GITHUB }}
+          DOCKER_TAG: ${{ steps.vars.outputs.branch }}-${{ steps.vars.outputs.sha_short }}
+          PROJECT_NAME: ${{ github.event.repository.name }}
+          BRANCH_NAME: ${{ steps.vars.outputs.branch }}
+          AWS_ECR: ${{ secrets.AWS_ECR }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          ENV_K8s_KUBECONFIG: DEV        
+        run: |
+
+          curl -O https://s3.us-west-2.amazonaws.com/amazon-eks/1.22.15/2022-10-31/bin/linux/amd64/kubectl
+          chmod +x ./kubectl
+          mkdir -p $HOME/bin && cp ./kubectl $HOME/bin/kubectl && export PATH=$PATH:$HOME/bin
+          echo 'export PATH=$PATH:$HOME/bin' >> ~/.bashrc
+          kubectl version --short --client
+          
+          mkdir -p /home/runner/.ssh
+          touch /home/runner/.ssh/known_hosts
+          #mkdir -p ~/.ssh/known_hosts
+          #ssh-keyscan github.com >> ~/.ssh/known_hosts
+          curl --silent https://api.github.com/meta \
+          | jq --raw-output '"github.com "+.ssh_keys[]' >> ~/.ssh/known_hosts
+          echo "$WITHME_DEVOPS_GITHUB" >> withme_devops_github.pem
+          chmod 600 withme_devops_github.pem
+          path_key=$(pwd)/withme_devops_github.pem
+          cp $path_key withme-devops-github          
+          
+          #ssh-keyscan github.com >> ~/.ssh/known_hosts
+          echo "${{ secrets.DEV_KUBECONFIG }}" >> kubeconfig
+          export KUBECONFIG=$(pwd)/kubeconfig
+          chmod 600 withme_devops_github.pem
+          export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+          export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY   
+          
+          GIT_SSH_COMMAND="ssh -i ${path_key}" git clone git@github.com:withmehealth/bootstrapper-init.git
+          export NAMESPACE=$ENV_K8s
+          cd bootstrapper-init
+          python template.py $PROJECT_NAME $ENV_K8s
+          cd generated_manifests/$ENV_K8s/$PROJECT_NAME
+          echo "${{ secrets[format('{0}_KUBECONFIG', env.ENV_K8s_KUBECONFIG)] }}" >> kubeconfig
+          export KUBECONFIG=$(pwd)/kubeconfig
+          bash deploy.sh Rel_${{ env.REL_VER }}
+      - name: DB Migrations
+        shell: bash
+        env:
+          BRANCH_NAME: ${{ steps.vars.outputs.branch }}
+          PROJECT_NAME: ${{ github.event.repository.name }}
+          NAME: ${{ github.event.repository.name }}-${{ env.ENV_K8s }}
+        run: |
+          curl -O https://s3.us-west-2.amazonaws.com/amazon-eks/1.22.15/2022-10-31/bin/linux/amd64/kubectl
+          chmod +x ./kubectl
+          mkdir -p $HOME/bin && cp ./kubectl $HOME/bin/kubectl && export PATH=$PATH:$HOME/bin
+          echo 'export PATH=$PATH:$HOME/bin' >> ~/.bashrc
+          kubectl version --short --client        
+        
+          export NAMESPACE=$ENV_K8s
+          echo "${{ secrets.DEV_KUBECONFIG }}" >> kubeconfig
+          export KUBECONFIG=$(pwd)/kubeconfig
+          echo -e "==> Waiting for ${NAME} to start..."
+          pod_count=0
+          while [ $pod_count -eq 0 ]; do
+          echo "Waiting"
+          sleep 90
+          pods_status=$(kubectl get pods -n ${NAMESPACE} --sort-by=.metadata.creationTimestamp | grep ${NAME}| grep "Running" | grep "1/1"| tac)
+          pods=$(echo $pods_status | awk '{print $1}')
+            echo -e "==> PODS:\n$pods"
+            pod_count=$(echo -e "$pods_status" | grep "Running" | grep "1/1" | wc -l)
+          done
+          echo -e "==> Ready"
+        
+          echo -e "==> Start alembic upgrade"
+          kubectl -n ${NAMESPACE} exec -t $pods -- python manage.py migrate
+          echo -e "==> Start dml_migrations init"
+          kubectl -n ${NAMESPACE} exec -t $pods -- dml_migrations init .
+          echo -e "==> Start dml_migrations upgrade"
+          kubectl -n ${NAMESPACE} exec -t $pods -- dml_migrations upgrade .
+          echo -e "==> Completed"
+
+  Print-Outputs:
+    runs-on: [ubuntu-latest]
+    needs: Docker-Build
+    name: Deployed-Rel_${{ needs.Docker-Build.outputs.my_output }}
+    steps:
+      - name: Print Output
+        run: echo "Deployed Rel_${{ needs.Docker-Build.outputs.my_output }}"
