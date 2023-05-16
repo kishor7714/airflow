@@ -26,6 +26,11 @@ jobs:
             echo "jq installed"
             aws --version
             echo "aws installed"
-            
-            echo "${{ secrets.DEMO_KUBECONFIG }}" >> kubeconfig
+
+      - name: 
+        run: |
+            secret_value: "${{ secrets.ENV_k8s_KUBECONFIG }}"
+            env_var: "${{ env.ENV_k8s }}"
+            echo "$secret_value" >> "$env_var"/kubeconfig
             export KUBECONFIG=$(pwd)/kubeconfig
+            
