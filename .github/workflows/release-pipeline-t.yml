@@ -1,25 +1,32 @@
 name: Release-Pipeline-Test
 
-# Controls when the workflow will run
+## Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the "main" branch
+## Triggers the workflow on push or pull request events but only for the "main" branch
   push:
     branches: [ "main" ]
 #   pull_request:
 #     branches: [ "main" ]
 
-  # Allows you to run this workflow manually from the Actions tab
+## Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
+## Docker-Build is a job that runs on Ubuntu 20.04 and has a name of “Building-Docker-image”
+## The env section defines environment variables that can be accessed by any step within this job
+## In this case, GITHUB_TOKEN is an environment variable that is set to the value of ${{ secrets.DEVOPS_GITHUB_TOKEN }}
+##The ENV_K8s variable is set to “test”
+## The outputs section defines an output called my_output, which is set to the value of ${{ steps.vars.outputs.REL_VERSION }}. This output can be used in subsequent jobs    
 jobs:
   Docker-Build:
     runs-on: [ubuntu-20.04]
     name: Building-Docker-image
     env:
       GITHUB_TOKEN: ${{ secrets.DEVOPS_GITHUB_TOKEN }}
-      ENV_K8s: "test"
+      ENV_K8s: "test"  
     outputs:
-      my_output: ${{ steps.vars.outputs.REL_VERSION }}      
+      my_output: ${{ steps.vars.outputs.REL_VERSION }} 
+      
+## This is a series of steps that installs the jq package on Ubuntu 
     steps:
       - name: Installing dependencies
         run: |
@@ -27,10 +34,21 @@ jobs:
           sudo apt install -y jq
           jq --version
           echo "jq installed"
+
+## This is a step that checks out the code for the repository.
+## The step is named “Checkout code”. The uses keyword is used to specify the action that should be used
+## In this case, the actions/checkout@v3 action is used. The with keyword is used to specify any inputs that should be passed to the action
+## In this case, the fetch-depth input is set to 0.
+## The actions/checkout@v3 action checks out the repository at the specified version.
+## The fetch-depth input specifies how many commits should be fetched during checkout.
+## A value of 0 means that all commits should be fetched.
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0      
+          fetch-depth: 0
+
+
+
       - name: Set major release
         #if: ${{ github.event.label.name == 'release-major' }}
         run: |
@@ -46,6 +64,8 @@ jobs:
           week=$(date +%V)
           echo "week=${week}" >> $GITHUB_ENV
           echo "week" ${week} set
+
+          
       - name: Set owner and repo name
         run: |
           echo "OWNER=withmehealth" >> $GITHUB_ENV
